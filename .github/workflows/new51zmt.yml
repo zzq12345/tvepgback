@@ -1,0 +1,77 @@
+﻿name: epgnew51zmt
+
+on:
+  schedule:
+    - cron: '18 */1 * * *'
+  workflow_dispatch:
+
+jobs:
+  generate_and_upload:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 第一步：检出当前仓库
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 第二步：设置 PHP 环境
+      - name: Set up PHP 7.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+
+      # 第三步：生成文件 (修复路径问题)
+      - name: Run epg51zmt.php
+        run: |
+          php epg51zmt.php
+          # 确认文件生成位置
+          echo "生成文件路径: $(pwd)/epgnew51zmt.xml"
+          ls -l epgnew51zmt.xml  # 添加文件存在性检查
+
+      # 第四步：检出目标仓库
+      - name: Checkout target repo
+        uses: actions/checkout@v4
+        with:
+          repository: zzq12345/tvepgback
+          token: ${{ secrets.GITHUB_TOKEN }}
+          path: tvepgback
+
+      # 第五步：强制覆盖文件 (修复路径引用)
+      - name: Overwrite target file
+        run: |
+          # 使用绝对路径确保文件位置准确
+          SRC_FILE="$GITHUB_WORKSPACE/epgnew51zmt.xml"
+          DEST_DIR="$GITHUB_WORKSPACE/tvepgback"
+          
+          # 调试输出
+          echo "源文件路径: $SRC_FILE"
+          echo "目标目录: $DEST_DIR"
+          
+          # 检查源文件是否存在
+          if [ ! -f "$SRC_FILE" ]; then
+            echo "::error::源文件 $SRC_FILE 不存在!"
+            exit 1
+          fi
+          
+          # 执行复制
+          cp -fv "$SRC_FILE" "$DEST_DIR/epgnew51zmt.xml"
+          ls -l "$DEST_DIR/epgnew51zmt.xml"
+
+      # 第六步：提交变更
+      - name: Commit and push
+        working-directory: tvepgback
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add epgnew51zmt.xml
+          
+          if [ -n "$(git status --porcelain)" ]; then
+            now_time=$(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S')
+            git commit -m "自动更新时间：$now_time"
+            git push origin main
+          else
+            echo "无实际文件变更，跳过提交"
+          fi
+          
+            

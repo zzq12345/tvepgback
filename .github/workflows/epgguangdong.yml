@@ -1,0 +1,49 @@
+name: epgguangdong
+
+on:
+  schedule:
+    - cron: '15 */1 * * *'
+  workflow_dispatch:
+jobs:
+  generate_and_upload:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 檢出代碼
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true  # 保留推送權限
+
+      # 2. 設置 PHP 7.4 環境
+      - name: Set up PHP 7.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+
+      # 3. 生成 epgguangdong.xml
+      - name: Run epgguangdong.php
+        run: php epgguangdong.php
+
+      # 4. 顯示文件大小 (方便除錯)
+      - name: Check file size
+        run: |
+          if [ -f epgguangdong.xml ]; then
+            ls -lh epgguangdong.xml
+          else
+            echo "⚠️ epgguangdong.xml 未生成"
+          fi
+
+      # 5. 提交 epgguangdong.xml 到當前倉庫 (強制推送)
+      - name: Commit epgguangdong.xml to current repository
+        run: |
+          if [ -s epgguangdong.xml ]; then   # -s 表示檔案存在且非空
+            git config --local user.name "github-actions[bot]"
+            git config --local user.email "github-actions[bot]@users.noreply.github.com"
+            git add epgguangdong.xml
+            git commit -m "Update epgguangdong.xml: $(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S')" || echo "No changes to commit."
+            git push origin main --force || echo "推送到當前倉庫失敗"
+          else
+            echo "⚠️ epgguangdong.xml 不存在或為空，跳過推送"
+          fi
