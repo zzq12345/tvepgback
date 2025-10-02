@@ -1,4 +1,4 @@
-name: convert guangdong 
+name: epgguangdong 
 on:
   schedule:
     - cron: "0 */2 * * *"  # 每两小时运行一次
