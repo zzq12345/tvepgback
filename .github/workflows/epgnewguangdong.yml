@@ -28,9 +28,9 @@ jobs:
       - name: Checkout target repo
         uses: actions/checkout@v4
         with:
-          repository: zzq12345/tvepgbackback
+          repository: zzq12345/tvepgback
           token: ${{ secrets.GITHUB_TOKEN }}
-          path: tvepgbackback
+          path: tvepgback
 
       # 第五步：强制覆盖文件（关键修复）
       - name: Overwrite target file
@@ -38,13 +38,13 @@ jobs:
           # 确保覆盖前文件存在
           ls -l epgnewguangdong.xml
           # 强制复制并保留权限
-          cp -f epgnewguangdong.xml tvepgbackback/epgnewguangdong.xml
+          cp -f epgnewguangdong.xml tvepgback/epgnewguangdong.xml
           # 验证覆盖结果
           ls -l tvepgbackback/epgnewguangdong.xml
 
       # 第六步：提交变更（优化路径处理）
       - name: Commit and push
-        working-directory: tvepgbackback  # 使用官方推荐方式指定路径
+        working-directory: tvepgback  # 使用官方推荐方式指定路径
         run: |
           # 显式检查文件状态
           git status
