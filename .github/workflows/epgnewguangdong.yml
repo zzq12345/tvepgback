@@ -40,7 +40,7 @@ jobs:
           # 强制复制并保留权限
           cp -f epgnewguangdong.xml tvepgback/epgnewguangdong.xml
           # 验证覆盖结果
-          ls -l tvepgbackback/epgnewguangdong.xml
+          ls -l tvepgback/epgnewguangdong.xml
 
       # 第六步：提交变更（优化路径处理）
       - name: Commit and push
